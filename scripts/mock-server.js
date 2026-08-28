@@ -57,6 +57,35 @@ app.post('/api/reminders/:id/acknowledge', (_q, res) => { reminder = null; res.j
 app.post('/api/frame', (req, res) => { frame = { image: req.body.image, captured_at: new Date().toISOString() }; res.json({ ok: true }) })
 app.get('/api/frame', (_q, res) => res.json(frame || {}))
 
+// A transcript that grows while you watch, so the panel behaves the way it
+// will with a live conversation.
+const SCRIPT = [
+  ['elder', 'Is that you, Ruby? You look thinner.'],
+  ['avatar', "It's me, Amama. I'm eating, I promise. How did you sleep?"],
+  ['elder', 'Not well. The neighbours were up half the night with their music.'],
+  ['avatar', 'That sounds annoying. Did you go out to the balcony this morning?'],
+  ['elder', 'Yes, the parrots came. Two of them, sitting on the railing.'],
+  ['avatar', 'The green ones? You used to point them out to me when I was small.'],
+  ['elder', 'Ravi came by with the mangoes again, such a sweet boy.'],
+  ['avatar', "Tell me about that, I don't think you've told me before."],
+  ['elder', 'What day is it today, kanna?'],
+  ['avatar', "It's Friday, Amama. And I'm right here."],
+  ['elder', 'I took my tablet after breakfast. The white one.'],
+  ['avatar', "Good. That's the one that matters most in the morning."],
+  ['elder', 'What day is it today?'],
+  ['avatar', "Still Friday. You have the whole weekend ahead of you."],
+]
+
+const started = Date.now()
+app.get('/api/transcript', (_q, res) => {
+  const shown = Math.min(SCRIPT.length, 4 + Math.floor((Date.now() - started) / 8000))
+  res.json(SCRIPT.slice(0, shown).map(([speaker, text], i) => ({
+    speaker,
+    text,
+    ts: new Date(started - (shown - i) * 45000).toISOString(),
+  })))
+})
+
 app.get('/api/medication', (_q, res) => res.json([
   { medicine_name: 'Metformin', scheduled_time: '08:00', taken: true },
   { medicine_name: 'Evening dose', scheduled_time: '20:00', taken: null },
