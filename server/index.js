@@ -251,33 +251,39 @@ app.post('/api/llm/chat/completions', async (req, res) => {
   }
 })
 
-// Tavus posts conversation events here (transcript lines, and the end of the
-// call). We use the end to write a summary.
+// Tavus posts conversation events here. The per-turn transcript is already
+// captured through /api/llm/chat/completions, so all we do here is write the
+// end-of-call summary — once, even though Tavus fires shutdown more than once.
+let lastShutdownAt = 0
 app.post('/api/tavus/webhook', async (req, res) => {
   res.json({ ok: true })
   try {
-    const e = req.body || {}
-    const type = e.event_type || e.message_type || ''
+    const type = req.body?.event_type || req.body?.message_type || ''
+    if (!/ended|shutdown/i.test(type)) return
+    if (Date.now() - lastShutdownAt < 60000) return   // dedupe the double shutdown
+    lastShutdownAt = Date.now()
     const id = (await db.firstFamily())?.id
-    if (!id) return
-
-    if (/ended|shutdown/i.test(type)) {
-      await generateSummary(id, 'conversation_end').catch(console.error)
-      return
-    }
-
-    const text = e.properties?.text || e.properties?.transcript
-    if (!text) return
-    const speaker = e.properties?.role === 'user' || e.properties?.speaker === 'user' ? 'elder' : 'avatar'
-    const embedding = await llm.embed(text)
-    await write(id, speaker, text, embedding, {})
+    if (id) await generateSummary(id, 'conversation_end').catch(console.error)
   } catch (err) { console.error(err) }
 })
 
 // ─── Everything that happens after she speaks ────────────────────────
 
+const NOISE = /automated connectivity check|custom llm configuration test|connectivity check sent during/i
+
 async function ingest(family_id, spoken, reply, embedding) {
   const s = sessionOf(family_id)
+
+  // Tavus's config-time probe, and anything with no real words, is not a turn.
+  if (!spoken || !spoken.trim() || NOISE.test(spoken)) return
+
+  // Tavus retries and speculatively re-sends turns. If the same line comes
+  // back within a few seconds, it's not a new turn — don't double-record it.
+  const norm = spoken.trim().toLowerCase()
+  if (s.lastLine === norm && Date.now() - (s.lastLineAt || 0) < 20000) return
+  s.lastLine = norm
+  s.lastLineAt = Date.now()
+
   s.turns.push({ speaker: 'elder', text: spoken }, { speaker: 'avatar', text: reply })
   s.turns = s.turns.slice(-12)
 
@@ -328,7 +334,14 @@ async function write(family_id, speaker, text, embedding, extra) {
 
 // ─── The daily summary — generated and kept ──────────────────────────
 
+let lastSummaryAt = 0
+let lastSummaryText = ''
 async function generateSummary(family_id, trigger = 'manual') {
+  // Don't regenerate on every shutdown ping / button mash.
+  if (trigger !== 'manual' && Date.now() - lastSummaryAt < 90000) {
+    return { summary: lastSummaryText, stored: false }
+  }
+
   const [family, said, meds, gaps] = await Promise.all([
     db.family(family_id), ch.saidToday(family_id), db.medicineToday(family_id), db.openGaps(family_id),
   ])
@@ -368,6 +381,8 @@ ${said.slice(-60).map(s => `${s.speaker === 'elder' ? family.elder_name : family
     created_at: stamp(),
   }])
 
+  lastSummaryAt = Date.now()
+  lastSummaryText = summary
   return { summary, mood, stored: true }
 }
 
