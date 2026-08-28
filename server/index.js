@@ -284,6 +284,13 @@ app.get('/api/frame', async (req, res) => {
   try { res.json((await db.frame(await fid(req))) || {}) } catch (e) { fail(res)(e) }
 })
 
+app.get('/api/transcript', async (req, res) => {
+  try {
+    const said = await ch.saidToday(await fid(req))
+    res.json(said.map(s => ({ speaker: s.speaker, text: s.text, ts: s.ts })))
+  } catch (e) { fail(res)(e) }
+})
+
 app.get('/api/medication', async (req, res) => {
   try { res.json(await db.medicineToday(await fid(req))) } catch (e) { fail(res)(e) }
 })
