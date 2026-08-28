@@ -58,6 +58,11 @@ services:
       MONGO_URI: mongodb://mongodb:27017/LibreChat
       CONFIG_PATH: /app/librechat.yaml
       ENDPOINTS: agents,custom
+      # Served from chat.localhost so it's same-site with the console at
+      # app.localhost — LibreChat's SameSite=Strict auth cookies then work
+      # inside the console's iframe.
+      DOMAIN_CLIENT: http://chat.localhost:3081
+      DOMAIN_SERVER: http://chat.localhost:3081
     volumes:
       - ./librechat.yaml:/app/librechat.yaml:ro
       - postcard_librechat_images:/app/client/public/images

@@ -6,15 +6,21 @@ Everything is up right now. This is how it's wired and how to bring it back.
 
 | | URL | login |
 |---|---|---|
-| **Console** (Ruby's side) | http://localhost:3002/console | — |
-| Setup (curated context) | http://localhost:3002/setup | — |
-| Her screen (the avatar) | http://localhost:3002/her | — |
+| **Console** (Ruby's side) | http://app.localhost:3002/console | — |
+| Setup (curated context) | http://app.localhost:3002/setup | — |
+| Her screen (the avatar) | http://app.localhost:3002/her | — |
 | **ClickHouse** (for judges) | http://localhost:8123/play | `default` / `postcard` |
-| **LibreChat** | http://localhost:3081 | register any email, no verification needed |
+| **LibreChat** | http://chat.localhost:3081 | register any email, no verification needed |
 | API | http://localhost:3001 | — |
 
 > The frontend is on **3002** and LibreChat on **3081** because you already had
 > something on 3000 and a LibreChat on 3080.
+>
+> **Open the console as `app.localhost`, not `localhost`.** LibreChat's login
+> cookie is `SameSite=Strict`, so it only works inside the console's iframe when
+> the two share a site. `app.localhost` and `chat.localhost` are both the
+> `localhost` site; plain `localhost:3002` + `localhost:3081` are cross-site and
+> the embedded chat silently fails to stay logged in.
 
 ## The five processes
 
@@ -31,7 +37,7 @@ Everything is up right now. This is how it's wired and how to bring it back.
 LibreChat is running with the 9 Postcard MCP tools connected and Nebius as the
 model provider. You just have to build the agent once:
 
-1. http://localhost:3081 → register (any email, password ≥ 8 chars)
+1. http://chat.localhost:3081 → register (any email, password ≥ 8 chars)
 2. **Agents → Create**
    - Name: `Amama`
    - Model: **Nebius / Qwen3-30B-A3B-Instruct-2507**
