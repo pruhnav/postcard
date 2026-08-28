@@ -30,6 +30,7 @@ let frame = null
 let reminder = { id: 'r1', kind: 'medicine', text: 'Time for your blood pressure tablet' }
 
 app.get('/api/family', (_q, res) => res.json(FAMILY))
+app.post('/api/family', (req, res) => { Object.assign(FAMILY, req.body); res.json({ id: FAMILY.id, updated: true }) })
 
 app.get('/api/context', (_q, res) => res.json({
   family: FAMILY,

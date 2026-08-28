@@ -1,4 +1,5 @@
 require('dotenv').config({ path: '.env.local' })
+require('dotenv').config({ path: '.env' })
 
 // Months of conversation, generated from the persona document and the
 // context in Postgres.
@@ -14,6 +15,7 @@ const db = require('../server/db')
 const ch = require('../server/ch')
 const llm = require('../server/llm')
 const { DOC } = require('../server/persona')
+const { today } = require('../server/localtime')
 
 const arg = (flag, fallback) => {
   const i = process.argv.indexOf(flag)
@@ -111,14 +113,19 @@ async function main() {
         }
       } catch { vectors = texts.map(() => []) }
 
+      // Her wall-clock time. The ClickHouse session runs in APP_TZ, so a row
+      // stamped '2026-08-01 18:30:00' is genuinely 6:30pm in Chennai and the
+      // distress-by-hour panel puts it where it belongs.
+      const day = today(date)
       const rows = turns.map((t, n) => {
-        const ts = new Date(date)
-        ts.setHours(b.hour, (n * 2) % 55, (n * 7) % 59, 0)
+        const hh = String(b.hour).padStart(2, '0')
+        const mm = String((n * 2) % 55).padStart(2, '0')
+        const ss = String((n * 7) % 59).padStart(2, '0')
         const evening = b.hour >= 17
         return {
           family_id: family.id,
-          session_id: `seed-${date.toISOString().slice(0, 10)}`,
-          ts: ts.toISOString().replace('T', ' ').slice(0, 23),
+          session_id: `seed-${day}`,
+          ts: `${day} ${hh}:${mm}:${ss}.000`,
           speaker: t.speaker,
           text: t.text,
           embedding: vectors[n] || [],

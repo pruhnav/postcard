@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+build/
+.DS_Store
+*.log
+
+# Local secrets / working copies
+librechat.env
+
+# Local model cache for @xenova/transformers
+.cache/
+.transformers-cache/

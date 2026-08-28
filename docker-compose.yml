@@ -1,0 +1,87 @@
+# The infra Postcard needs locally: ClickHouse, LibreChat (+ Mongo), and an
+# optional Postgres. Tavus and the LLM are remote APIs, not here.
+#
+#   docker compose up -d
+#   docker compose logs -f librechat
+#
+# ClickHouse → localhost:8123   (HTTP; also the /play query UI for judges)
+# LibreChat  → localhost:3080
+# Postgres   → localhost:5433   (only if you don't have a hosted one — see below)
+#
+# LibreChat reaches the Postcard MCP server at host.docker.internal:3001/mcp,
+# so run `npm run server` on the host before using the chat panel.
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    restart: unless-stopped
+    ports:
+      - "8123:8123"   # HTTP — our client, and http://localhost:8123/play for judges
+      - "9000:9000"   # native protocol
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: postcard
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+    volumes:
+      - postcard_ch:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--password", "postcard", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - postcard_mongo:/data/db
+    command: mongod --quiet
+
+  librechat:
+    image: ghcr.io/danny-avila/librechat:latest
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    ports:
+      - "3081:3080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - ./librechat.env   # cp librechat.env.example librechat.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3080
+      MONGO_URI: mongodb://mongodb:27017/LibreChat
+      CONFIG_PATH: /app/librechat.yaml
+      ENDPOINTS: agents,custom
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - postcard_librechat_images:/app/client/public/images
+      - postcard_librechat_logs:/app/api/logs
+
+  # Optional. Only starts with:  docker compose --profile local-pg up -d
+  # Skip it if DATABASE_URL points at a hosted Postgres (Neon, ClickHouse
+  # Cloud's managed Postgres, RDS, …).
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["local-pg"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postcard
+      POSTGRES_PASSWORD: postcard
+      POSTGRES_DB: postcard
+    ports:
+      - "5433:5432"
+    volumes:
+      - postcard_pg:/var/lib/postgresql/data
+
+volumes:
+  postcard_ch:
+  postcard_mongo:
+  postcard_pg:
+  postcard_librechat_images:
+  postcard_librechat_logs:
