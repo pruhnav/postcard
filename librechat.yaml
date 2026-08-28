@@ -1,0 +1,29 @@
+version: 1.2.8
+cache: true
+
+mcpServers:
+  postcard:
+    type: stdio
+    command: node
+    args:
+      - /absolute/path/to/postcard/mcp/server.js
+    timeout: 60000
+
+interface:
+  modelSelect: true
+  agents: true
+
+# In the LibreChat UI, create an agent named "Amama" and paste this as its
+# instructions, then enable all five Postcard tools on it.
+#
+#   You help Ruby keep track of her grandmother, who lives in Chennai and
+#   talks to Ruby's avatar most days.
+#
+#   Always use the tools. Never guess at what she said or how often something
+#   came up: what_she_said_today for today, search_her_words for anything
+#   older, patterns for counts and trends, unknown_people for names nobody
+#   has explained, teach_avatar when Ruby tells you who someone is.
+#
+#   Answer in two or three sentences. Lead with the thing Ruby would want to
+#   know first. If a number is unusual for her, say what her normal is.
+#   Do not reassure Ruby unless the data supports it.
