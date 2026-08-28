@@ -177,10 +177,18 @@ app.post('/api/tavus', async (req, res) => {
 // the only reason retrieval can influence what she actually hears.
 app.post('/api/llm/chat/completions', async (req, res) => {
   const started = Date.now()
+  const wantStream = !!req.body.stream
   try {
     const id = await fid(req) || (await db.firstFamily())?.id
     const messages = req.body.messages || []
-    const spoken = [...messages].reverse().find(m => m.role === 'user')?.content || ''
+    // Tavus wraps the transcript with <user_audio_analysis>…</user_audio_analysis>
+    // and similar tags. The model should see them; our stored transcript,
+    // embeddings and extraction should not.
+    const rawSpoken = [...messages].reverse().find(m => m.role === 'user')?.content || ''
+    const spoken = rawSpoken
+      .replace(/<user_audio_analysis>[\s\S]*?<\/user_audio_analysis>/gi, '')
+      .replace(/<[^>]+>/g, '')
+      .trim()
 
     const [family, relations, memories, updates] = await Promise.all([
       db.family(id), db.relations(id), db.memories(id), db.latestUpdates(id),
@@ -188,10 +196,44 @@ app.post('/api/llm/chat/completions', async (req, res) => {
 
     const embedding = await llm.embed(spoken)
     const recalled = embedding.length ? await ch.recall(id, embedding, 8) : []
-
     const system = buildSystem({ family, relations, memories, updates, recalled })
-    const reply = await llm.chat(messages.filter(m => m.role !== 'system'), { system, max_tokens: 220 })
+    const convo = messages.filter(m => m.role !== 'system')
 
+    // ── Streaming path (Tavus) ──
+    if (wantStream) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      })
+      const cid = `chatcmpl-${randomUUID()}`
+      const chunk = (delta, finish = null) => res.write(`data: ${JSON.stringify({
+        id: cid, object: 'chat.completion.chunk', created: Math.floor(Date.now() / 1000),
+        model: llm.MODEL, choices: [{ index: 0, delta, finish_reason: finish }],
+      })}\n\n`)
+
+      chunk({ role: 'assistant' })
+      let full = ''
+      try {
+        for await (const d of llm.chatStream(convo, { system, max_tokens: 220 })) {
+          full += d
+          chunk({ content: d })
+        }
+      } catch (e) {
+        console.error('stream upstream:', e.message)
+      }
+      if (!full.trim()) { full = 'Amama, say that again for me — I want to hear you properly.'; chunk({ content: full }) }
+      chunk({}, 'stop')
+      res.write('data: [DONE]\n\n')
+      res.end()
+
+      ingest(id, spoken, full, embedding).catch(console.error)
+      console.log(`turn (stream) in ${Date.now() - started}ms`)
+      return
+    }
+
+    // ── Non-streaming path (curl / our own tests) ──
+    const reply = await llm.chat(convo, { system, max_tokens: 220 })
     res.json({
       id: `chatcmpl-${randomUUID()}`,
       object: 'chat.completion',
@@ -200,12 +242,12 @@ app.post('/api/llm/chat/completions', async (req, res) => {
       choices: [{ index: 0, message: { role: 'assistant', content: reply }, finish_reason: 'stop' }],
       usage: {},
     })
-
     ingest(id, spoken, reply, embedding).catch(console.error)
     console.log(`turn in ${Date.now() - started}ms`)
   } catch (e) {
     console.error(e)
-    res.status(500).json({ error: e.message })
+    if (res.headersSent) res.end()
+    else res.status(500).json({ error: e.message })
   }
 })
 
@@ -266,19 +308,21 @@ async function ingest(family_id, spoken, reply, embedding) {
   if (applied.length) console.log(`  extracted: ${applied.join(' · ')}`)
 }
 
+const strArray = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]).map(String)
+
 async function write(family_id, speaker, text, embedding, extra) {
   const s = sessions.get(family_id)
   await ch.insert([{
     family_id,
-    session_id: s?.session_id || 'out-of-session',
+    session_id: String(s?.session_id || 'out-of-session'),
     ts: stamp(),
     speaker,
-    text,
-    embedding: embedding || [],
-    entities: extra.entities || [],
-    topics: extra.topics || [],
-    distress: extra.distress || 0,
-    is_repeat: extra.is_repeat || 0,
+    text: String(text == null ? '' : text),
+    embedding: Array.isArray(embedding) ? embedding : [],
+    entities: strArray(extra.entities),
+    topics: strArray(extra.topics),
+    distress: Math.max(0, Math.min(10, Math.round(Number(extra.distress) || 0))),
+    is_repeat: extra.is_repeat ? 1 : 0,
   }])
 }
 

@@ -125,14 +125,14 @@ async function audit(family_id, session_id, kind, payload, sourceText, applied, 
   await ch.insertInto('extractions', [{
     family_id,
     ts: stamp(),
-    session_id: session_id || 'out-of-session',
-    kind,
+    session_id: String(session_id || 'out-of-session'),
+    kind: String(kind || ''),
     payload: JSON.stringify(payload || {}),
-    source_text: (sourceText || '').slice(0, 500),
+    source_text: String(sourceText == null ? '' : sourceText).slice(0, 500),
     confidence: 0.8,
     applied: applied ? 1 : 0,
-    postgres_id: postgres_id || '',
-    note: note || '',
+    postgres_id: String(postgres_id || ''),
+    note: String(note || ''),
   }])
 }
 
