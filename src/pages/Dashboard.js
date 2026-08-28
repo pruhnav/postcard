@@ -33,12 +33,22 @@ export default function Dashboard() {
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [unknowns, setUnknowns] = useState([])
   const [meds, setMeds] = useState([])
+  const [transcript, setTranscript] = useState([])
   const [trends, setTrends] = useState(null)
   const [draft, setDraft] = useState({})
   const [here, setHere] = useState('')
   const [there, setThere] = useState('')
 
   const savingRef = useRef({})
+  const scrollRef = useRef(null)
+
+  // Keep the newest line in view without yanking the page if you scrolled up.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+    if (nearBottom) el.scrollTop = el.scrollHeight
+  }, [transcript.length])
 
   const elderName = family.elder_name || family.parent_name || 'Amama'
   const elderTz = family.elder_tz || family.timezone || 'Asia/Kolkata'
@@ -66,6 +76,7 @@ export default function Dashboard() {
     get('/api/frame', setFrame)
     get('/api/unknown-people', d => setUnknowns(Array.isArray(d) ? d : []))
     get('/api/medication', d => setMeds(Array.isArray(d) ? d : []))
+    get('/api/transcript', d => setTranscript(Array.isArray(d) ? d : []))
     get('/api/trends', setTrends)
   }, [family_id])
 
@@ -150,6 +161,30 @@ export default function Dashboard() {
               {frame?.image
                 ? <img src={frame.image} alt={`${elderName}'s room`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : <span style={{ color: '#4b5563', fontSize: 14 }}>Her screen is not open right now</span>}
+            </div>
+          </Panel>
+
+          <Panel title="What she's saying" note={transcript.length ? `${transcript.length} lines today` : 'quiet'}>
+            <div ref={scrollRef} style={{ maxHeight: 260, overflowY: 'auto', paddingRight: 4 }}>
+              {transcript.length === 0 && (
+                <div style={{ color: '#4b5563', fontSize: 14 }}>She has not said anything today.</div>
+              )}
+              {transcript.map((line, i) => (
+                <div key={i} style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 2 }}>
+                    {line.speaker === 'elder' ? elderName : 'Companion'}
+                    {line.ts && ` · ${new Date(line.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`}
+                  </div>
+                  <div style={{
+                    fontSize: 14, lineHeight: 1.5,
+                    color: line.speaker === 'elder' ? '#fff' : '#a0a0c0',
+                    paddingLeft: 10,
+                    borderLeft: `2px solid ${line.speaker === 'elder' ? '#fbbf24' : '#1e3a5f'}`,
+                  }}>
+                    {line.text}
+                  </div>
+                </div>
+              ))}
             </div>
           </Panel>
 
