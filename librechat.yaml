@@ -42,8 +42,9 @@ interface:
 #
 #   1. Register any email / password (registration is open).
 #   2. Agents → Create.  Name: Amama.  Model: Nebius / Qwen3-30B-A3B-Instruct-2507.
-#   3. Add Tools → the `postcard` group → all nine tools.
-#   4. Paste docs/amama-agent.md as the Instructions.
+#   3. Add Tools → the `postcard` group → all ten tools.
+#   4. Paste docs/amama-agent.md as the Instructions. The wording matters — it
+#      stops the model role-playing as Ruby instead of answering her.
 #   5. Create, then select the Amama agent in chat (not the raw "Nebius" model).
 #
 # The finished agent is also exported to docs/amama-agent.json for reference.

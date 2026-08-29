@@ -28,6 +28,11 @@ const TOOLS = [
     },
   },
   {
+    name: 'family_context',
+    description: "The curated store the avatar speaks from: the family and who they are, the fixed memories, the medicines and schedule, and recent news about Ruby. Use to answer 'who is X', 'what medicines does she take', 'what does the avatar know'. Source: Postgres.",
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
     name: 'day_summary',
     description: "The kept end-of-conversation summaries, newest first, with her mood. Source: ClickHouse conversation_summaries.",
     inputSchema: { type: 'object', properties: { limit: { type: 'number' } } },
@@ -86,6 +91,18 @@ async function run(name, args = {}) {
       const emb = await llm.embed(args.query)
       const hits = await ch.recall(fid, emb, args.limit || 10)
       return hits.map(h => `${h.ts} ${h.speaker}: ${h.text}`).join('\n') || 'Nothing found.'
+    }
+    case 'family_context': {
+      const [relations, memories, medicines, updates] = await Promise.all([
+        db.relations(fid), db.memories(fid), db.medicines(fid), db.latestUpdates(fid, 3650),
+      ])
+      return {
+        family: { grandmother: family.elder_name, granddaughter: family.speaker_name, city: family.elder_city },
+        people: relations.map(r => ({ name: r.name, relation: r.relation, deceased: !!r.deceased, about: r.context, unverified: !!r.unverified })),
+        memories: memories.map(m => ({ title: m.title, detail: m.body, unverified: !!m.unverified })),
+        medicines: medicines.map(m => ({ name: m.name, dose: m.dose, time: String(m.schedule_time).slice(0, 5), unverified: !!m.unverified })),
+        recent_news_about_granddaughter: updates.slice(0, 5).map(u => u.body),
+      }
     }
     case 'day_summary':
       return await ch.recentSummaries(fid, args.limit || 7)
