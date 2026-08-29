@@ -1,21 +1,20 @@
-# Netlify only builds the React frontend. The API server, ClickHouse, Postgres
-# and LibreChat are NOT here — set REACT_APP_API (below) to a public URL for the
-# server (your ngrok tunnel, or a deployed copy), or the deployed site has no
-# backend to talk to. The "Ask about her" panel needs LibreChat reachable from
-# the browser too; for the in-person demo, run everything locally instead
-# (docs/RUNNING.md).
+# Netlify builds ONLY the React frontend. The backend runs on your machine and
+# is exposed through tunnels:
+#   REACT_APP_API           -> the API server (:3001), ngrok
+#   REACT_APP_LIBRECHAT_URL -> LibreChat (:3081), cloudflared — opens in a new tab
+#
+# Tunnel URLs change when a tunnel restarts. Update these two values (here or in
+# Site settings -> Environment variables) and redeploy. See docs/DEPLOY.md.
 
 [build]
   command = "npm run build"
   publish = "build"
 
 [build.environment]
-  # Point this at the public URL of `npm run server`.
   REACT_APP_API = "https://helper-prepaid-overhaul.ngrok-free.dev"
-  # LibreChat, reachable from a browser (not localhost). Leave blank to hide it.
-  REACT_APP_LIBRECHAT_URL = ""
+  REACT_APP_LIBRECHAT_URL = "https://egg-nominated-flags-tires.trycloudflare.com"
+  CI = "false"
 
-# SPA fallback so /console, /her, /setup don't 404 (also covered by public/_redirects).
 [[redirects]]
   from = "/*"
   to = "/index.html"

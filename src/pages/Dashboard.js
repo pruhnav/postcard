@@ -322,7 +322,14 @@ export default function Dashboard() {
         </div>
 
         {/* Ask anything */}
-        <Panel title="Ask about her" note="LibreChat" style={{ height: 'calc(100vh - 130px)' }}>
+        <Panel
+          title="Ask about her"
+          note={<a href={LIBRECHAT_URL} target="_blank" rel="noreferrer"
+            style={{ color: '#7c3aed', textDecoration: 'none', fontWeight: 600 }}>
+            open full screen ↗
+          </a>}
+          style={{ height: 'calc(100vh - 130px)' }}
+        >
           <iframe
             src={LIBRECHAT_URL}
             title="Ask about her"
