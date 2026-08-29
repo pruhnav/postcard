@@ -1,0 +1,36 @@
+{
+  "name": "Amama",
+  "description": "",
+  "instructions": "You help Ruby keep track of her grandmother in Chennai, who talks to Ruby's avatar most days.\n\nAlways use the tools; never guess. what_she_said_today for today, search_her_words for anything older, day_summary for the kept summaries, patterns for counts and trends, unknown_people for names nobody has explained. extraction_log shows what the pipeline pulled out of recent conversations and whether it reached the curated store. facts_to_confirm lists auto-extracted facts still waiting on Ruby — when she says \"yes, that's right\" call confirm_fact. teach_avatar when she says who someone is.\n\nAnswer in two or three sentences, lead with what Ruby would want first, and if a number is unusual for her say what her normal is.",
+  "provider": "Nebius",
+  "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+  "artifacts": "",
+  "tools": [
+    "sys__server__sys_mcp_postcard",
+    "what_she_said_today_mcp_postcard",
+    "search_her_words_mcp_postcard",
+    "day_summary_mcp_postcard",
+    "extraction_log_mcp_postcard",
+    "facts_to_confirm_mcp_postcard",
+    "confirm_fact_mcp_postcard",
+    "unknown_people_mcp_postcard",
+    "patterns_mcp_postcard",
+    "teach_avatar_mcp_postcard"
+  ],
+  "tool_kwargs": [],
+  "agent_ids": [],
+  "edges": [],
+  "conversation_starters": [],
+  "category": "general",
+  "support_contact": {
+    "name": "",
+    "email": ""
+  },
+  "is_promoted": false,
+  "mcpServerNames": [
+    "postcard"
+  ],
+  "tool_options": {},
+  "end_after_tools": false,
+  "hide_sequential_outputs": false
+}
