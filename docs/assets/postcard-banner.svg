@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 170" width="1200" height="170" role="img" aria-labelledby="title desc">
+  <title id="title">Postcard · Better Days Hackathon '26</title>
+  <desc id="desc">Postcard's wordmark beside its amber postage stamp logo with a serif P, on a dark frosted glass panel over warm amber and violet washes, with a "Better Days Hackathon '26" badge on the right.</desc>
+  <defs>
+    <clipPath id="frame"><rect width="1200" height="170" rx="26"/></clipPath>
+    <clipPath id="pane"><rect x="18" y="18" width="1164" height="134" rx="20"/></clipPath>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="38"/></filter>
+    <filter id="frost" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="46"/></filter>
+    <filter id="lift" x="-10%" y="-30%" width="120%" height="170%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity=".45"/>
+    </filter>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".02"/>
+    </linearGradient>
+    <!-- Perforations for the stamp, in the logo's 24-unit box. -->
+    <mask id="perf">
+      <rect width="24" height="24" fill="#fff"/>
+      <g fill="#000">
+        <circle cx="4.5" cy="1" r="1.1"/><circle cx="8.25" cy="1" r="1.1"/><circle cx="12" cy="1" r="1.1"/><circle cx="15.75" cy="1" r="1.1"/><circle cx="19.5" cy="1" r="1.1"/>
+        <circle cx="4.5" cy="23" r="1.1"/><circle cx="8.25" cy="23" r="1.1"/><circle cx="12" cy="23" r="1.1"/><circle cx="15.75" cy="23" r="1.1"/><circle cx="19.5" cy="23" r="1.1"/>
+        <circle cx="1" cy="4.5" r="1.1"/><circle cx="1" cy="8.25" r="1.1"/><circle cx="1" cy="12" r="1.1"/><circle cx="1" cy="15.75" r="1.1"/><circle cx="1" cy="19.5" r="1.1"/>
+        <circle cx="23" cy="4.5" r="1.1"/><circle cx="23" cy="8.25" r="1.1"/><circle cx="23" cy="12" r="1.1"/><circle cx="23" cy="15.75" r="1.1"/><circle cx="23" cy="19.5" r="1.1"/>
+      </g>
+    </mask>
+    <!-- The color washes, drawn twice: softly behind the pane, and blurred harder inside it to read as frosted glass. -->
+    <g id="washes">
+      <circle cx="110" cy="40" r="130" fill="#f2b544" fill-opacity=".30"/>
+      <circle cx="430" cy="175" r="130" fill="#e0794a" fill-opacity=".16"/>
+      <circle cx="780" cy="-10" r="110" fill="#b7a3ff" fill-opacity=".12"/>
+      <circle cx="1040" cy="150" r="150" fill="#b7a3ff" fill-opacity=".20"/>
+      <circle cx="1175" cy="20" r="90" fill="#f2b544" fill-opacity=".14"/>
+    </g>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1200" height="170" fill="#131114"/>
+    <use href="#washes" filter="url(#soft)"/>
+
+    <!-- Glass pane -->
+    <g filter="url(#lift)">
+      <rect x="18" y="18" width="1164" height="134" rx="20" fill="#161418"/>
+    </g>
+    <g clip-path="url(#pane)">
+      <use href="#washes" filter="url(#frost)"/>
+      <rect x="18" y="18" width="1164" height="134" fill="url(#sheen)"/>
+    </g>
+    <rect x="18.5" y="18.5" width="1163" height="133" rx="19.5" fill="none" stroke="#ffffff" stroke-opacity=".10"/>
+    <path d="M38 19.5h1124" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Logo: same geometry as the app's Logo mark, scaled from a 24-unit box. -->
+    <g transform="translate(56 51) scale(2.8333)">
+      <rect width="24" height="24" rx="2" fill="#f2b544" mask="url(#perf)"/>
+      <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="1.2" fill="none" stroke="#2a1c00" stroke-opacity=".28" stroke-width=".7"/>
+      <text x="12" y="16.6" text-anchor="middle" font-family="Lora, Georgia, 'Times New Roman', serif" font-weight="700" font-size="12.5" fill="#2a1c00">P</text>
+    </g>
+
+    <text x="146" y="95" font-family="Lora, Georgia, 'Times New Roman', serif" font-size="46" font-weight="700" letter-spacing="-.6" fill="#f6f3ee">Postcard</text>
+    <text x="148" y="124" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="17" fill="#9b958f">The small thing you send home when you can't be there.</text>
+
+    <!-- Event badge -->
+    <rect x="800" y="58" width="344" height="54" rx="27" fill="#f2b544" fill-opacity=".12"/>
+    <rect x="800.5" y="58.5" width="343" height="53" rx="26.5" fill="none" stroke="#f2b544" stroke-opacity=".45"/>
+    <!-- Heart geometry from Lucide (ISC license). -->
+    <g transform="translate(824 73) scale(1)" fill="none" stroke="#f2b544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+    </g>
+    <text x="862" y="91" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="800" letter-spacing="1.4" fill="#f2b544" textLength="258" lengthAdjust="spacing">BETTER DAYS HACKATHON '26</text>
+  </g>
+</svg>
