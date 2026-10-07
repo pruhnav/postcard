@@ -1,25 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import Icon from '../icons'
 
 const API = process.env.REACT_APP_API || 'http://localhost:3001'
 const LIBRECHAT_URL = process.env.REACT_APP_LIBRECHAT_URL || 'http://localhost:3080'
 
-const card = {
-  background: 'rgba(20,20,45,0.5)',
-  border: '1px solid #1e3a5f',
-  borderRadius: 12,
-  padding: 16,
-}
-
-const label = { color: '#a0a0c0', fontSize: 13, fontWeight: 600, marginBottom: 10 }
-
-function Panel({ title, note, children, style }) {
+function Panel({ title, icon, tone, note, children, style }) {
   return (
-    <section style={{ ...card, display: 'flex', flexDirection: 'column', minHeight: 0, ...style }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <div style={label}>{title}</div>
-        {note && <div style={{ color: '#6b7280', fontSize: 11 }}>{note}</div>}
+    <section className="panel" style={style}>
+      <div className="panel-head">
+        <div className="panel-title">
+          {icon && <span className={`tile sm ${tone || ''}`}><Icon name={icon} size={15} /></span>}
+          {title}
+        </div>
+        {note && <div className="panel-note">{note}</div>}
       </div>
-      <div style={{ flex: 1, minHeight: 0 }}>{children}</div>
+      <div className="panel-body">{children}</div>
     </section>
   )
 }
@@ -120,27 +115,27 @@ export default function Dashboard() {
     : null
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0a0a14', color: '#fff',
-      fontFamily: 'system-ui', padding: '20px 22px 72px',
-    }}>
+    <div className="page page-console">
 
-      <header style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-        paddingBottom: 16, borderBottom: '1px solid #1e3a5f', marginBottom: 18,
-      }}>
+      <header className="console-head">
         <div>
-          <div style={{ color: '#6b7280', fontSize: 12 }}>Looking in on</div>
-          <div style={{ fontSize: 26, fontWeight: 700, marginTop: 2 }}>{elderName}</div>
+          <div className="eyebrow">Looking in on</div>
+          <div className="console-title">{elderName}</div>
         </div>
-        <div style={{ display: 'flex', gap: 30, textAlign: 'right' }}>
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#fbbf24' }}>{there}</div>
-            <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>Her time</div>
+        <div className="clocks">
+          <div className="clock her">
+            <span className="tile accent"><Icon name="sun" size={17} /></span>
+            <div>
+              <div className="clock-value">{there}</div>
+              <div className="clock-label">Her time</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 700 }}>{here}</div>
-            <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>Yours</div>
+          <div className="clock">
+            <span className="tile"><Icon name="monitor" size={16} /></span>
+            <div>
+              <div className="clock-value">{here}</div>
+              <div className="clock-label">Yours</div>
+            </div>
           </div>
         </div>
       </header>
@@ -153,168 +148,138 @@ export default function Dashboard() {
 
         {/* Live view, day, medicine */}
         <div style={{ display: 'grid', gap: 14 }}>
-          <Panel title="Her room" note={frameAge === null ? 'no signal' : `${frameAge}s ago`}>
-            <div style={{
-              aspectRatio: '4 / 3', borderRadius: 8, overflow: 'hidden',
-              background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+          <Panel title="Her room" icon="camera"
+            note={frameAge === null
+              ? <span className="pill quiet">No signal</span>
+              : <span className="pill ok live">{frameAge}s ago</span>}>
+            <div className="room">
               {frame?.image
-                ? <img src={frame.image} alt={`${elderName}'s room`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ color: '#4b5563', fontSize: 14 }}>Her screen is not open right now</span>}
+                ? <img src={frame.image} alt={`${elderName}'s room`} />
+                : <div className="empty center">
+                    <Icon name="cameraOff" size={22} />
+                    Her screen is not open right now
+                  </div>}
             </div>
           </Panel>
 
-          <Panel title="What she's saying" note={transcript.length ? `${transcript.length} lines today` : 'quiet'}>
-            <div ref={scrollRef} style={{ maxHeight: 260, overflowY: 'auto', paddingRight: 4 }}>
+          <Panel title="What she's saying" icon="message"
+            note={transcript.length ? `${transcript.length} lines today` : 'quiet'}>
+            <div ref={scrollRef} className="transcript">
               {transcript.length === 0 && (
-                <div style={{ color: '#4b5563', fontSize: 14 }}>She has not said anything today.</div>
+                <div className="empty">She has not said anything today.</div>
               )}
               {transcript.map((line, i) => (
-                <div key={i} style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 2 }}>
-                    {line.speaker === 'elder' ? elderName : 'Companion'}
+                <div key={i} className={`line${line.speaker === 'elder' ? ' elder' : ''}`}>
+                  <div className="line-meta">
+                    <b>{line.speaker === 'elder' ? elderName : 'Companion'}</b>
                     {line.ts && ` · ${new Date(line.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`}
                   </div>
-                  <div style={{
-                    fontSize: 14, lineHeight: 1.5,
-                    color: line.speaker === 'elder' ? '#fff' : '#a0a0c0',
-                    paddingLeft: 10,
-                    borderLeft: `2px solid ${line.speaker === 'elder' ? '#fbbf24' : '#1e3a5f'}`,
-                  }}>
-                    {line.text}
-                  </div>
+                  <div className="line-text">{line.text}</div>
                 </div>
               ))}
             </div>
           </Panel>
 
-          <Panel title="Her day" note={summaryLoading ? 'writing' : ''}>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: summary ? '#fff' : '#4b5563' }}>
+          <Panel title="Her day" icon="notebook" note={summaryLoading ? 'writing' : ''}>
+            <p className={summary ? '' : 'empty'} style={{ fontSize: 14, lineHeight: 1.65 }}>
               {summary || 'Nothing written up yet for today.'}
             </p>
-            <button
-              onClick={loadSummary}
-              disabled={summaryLoading}
-              style={{
-                marginTop: 12, background: '#7c3aed', color: '#fff', border: 'none',
-                borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 600,
-                fontFamily: 'system-ui', cursor: 'pointer',
-              }}
-            >
+            <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={loadSummary} disabled={summaryLoading}>
+              <Icon name="sparkles" size={15} />
               {summaryLoading ? 'Writing...' : 'Write today up'}
             </button>
           </Panel>
 
-          <Panel title="Medicine" note="from what she said">
-            {meds.length === 0 && <div style={{ color: '#4b5563', fontSize: 14 }}>Nothing logged today.</div>}
-            {meds.map((m, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '9px 0', borderBottom: i < meds.length - 1 ? '1px solid #1e3a5f' : 'none',
-              }}>
-                <div>
-                  <div style={{ fontSize: 14 }}>{m.medicine_name}</div>
-                  <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{m.scheduled_time}</div>
+          <Panel title="Medicine" icon="pill" note="from what she said">
+            {meds.length === 0 && <div className="empty">Nothing logged today.</div>}
+            <div className="row-list">
+              {meds.map((m, i) => (
+                <div key={i} className="med-row">
+                  <div>
+                    <div className="med-name">{m.medicine_name}</div>
+                    <div className="sub num">{m.scheduled_time}</div>
+                  </div>
+                  <span className={`pill ${m.taken ? 'ok' : 'danger'}`}>
+                    {m.taken ? 'Said yes' : 'No answer'}
+                  </span>
                 </div>
-                <span style={{
-                  fontSize: 12, padding: '4px 10px', borderRadius: 6,
-                  background: m.taken ? '#0d2818' : '#2d0a0a',
-                  color: m.taken ? '#4caf50' : '#f87171',
-                  border: `1px solid ${m.taken ? '#1a5c2e' : '#7f1d1d'}`,
-                }}>
-                  {m.taken ? 'Said yes' : 'No answer'}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </Panel>
         </div>
 
         {/* Unknown people, patterns */}
         <div style={{ display: 'grid', gap: 14 }}>
-          <Panel title="People we don't know" note={unknowns.length ? `${unknowns.length} waiting` : 'clear'}>
+          <Panel title="People we don't know" icon="userQuestion" tone="accent"
+            note={unknowns.length
+              ? <span className="pill accent">{unknowns.length} waiting</span>
+              : <span className="pill ok">Clear</span>}>
             {unknowns.length === 0 && (
-              <div style={{ color: '#4b5563', fontSize: 14, textAlign: 'center', padding: 20 }}>
-                Every name she used today was one we already knew 🎉
+              <div className="empty center">
+                <span className="tile ok"><Icon name="checkCircle" size={18} /></span>
+                Every name she used today was one we already knew.
               </div>
             )}
             {unknowns.map(p => (
-              <article key={p.name} style={{
-                background: 'rgba(124,58,237,0.08)',
-                border: '1px solid #1e3a5f', borderLeft: '3px solid #fbbf24',
-                borderRadius: 8, padding: 14, marginBottom: 10,
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <div style={{ fontSize: 20, fontWeight: 700 }}>{p.name}</div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: '#fbbf24' }}>{p.mentions}</div>
-                    <div style={{ fontSize: 10, color: '#6b7280' }}>MENTIONS</div>
+              <article key={p.name} className="person">
+                <div className="person-head">
+                  <span className="monogram">{p.name.slice(0, 2)}</span>
+                  <div>
+                    <div className="person-name">{p.name}</div>
+                    {p.first_heard && <div className="sub">First heard {p.first_heard}</div>}
+                  </div>
+                  <div className="mentions">
+                    <div className="mentions-value">{p.mentions}</div>
+                    <div className="mentions-label">MENTIONS</div>
                   </div>
                 </div>
 
-                {p.first_heard && (
-                  <div style={{ fontSize: 11, color: '#6b7280', marginTop: 3 }}>first heard {p.first_heard}</div>
-                )}
-
                 {(p.quotes || []).slice(0, 3).map((q, i) => (
-                  <div key={i} style={{
-                    marginTop: 10, paddingLeft: 10, borderLeft: '2px solid #1e3a5f',
-                    fontSize: 13, lineHeight: 1.5, color: '#a0a0c0', fontStyle: 'italic',
-                  }}>
-                    "{q}"
-                  </div>
+                  <div key={i} className="quote">"{q}"</div>
                 ))}
 
                 <textarea
+                  className="field"
                   value={draft[p.name] || ''}
                   onChange={e => setDraft(d => ({ ...d, [p.name]: e.target.value }))}
                   placeholder={`Who is ${p.name}?`}
                   rows={2}
-                  style={{
-                    width: '100%', marginTop: 12, boxSizing: 'border-box',
-                    background: '#0a0a14', color: '#fff',
-                    border: '1px solid #1e3a5f', borderRadius: 8,
-                    padding: 10, fontSize: 14, fontFamily: 'system-ui', resize: 'vertical',
-                  }}
+                  style={{ marginTop: 12 }}
                 />
-                <button
-                  onClick={() => saveContext(p.name)}
-                  style={{
-                    marginTop: 8, background: '#7c3aed', color: '#fff', border: 'none',
-                    borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 600,
-                    fontFamily: 'system-ui', cursor: 'pointer',
-                  }}
-                >
+                <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => saveContext(p.name)}>
+                  <Icon name="check" size={15} />
                   Teach the companion
                 </button>
               </article>
             ))}
           </Panel>
 
-          <Panel title="Patterns" note="last 30 days">
-            {!trends && <div style={{ color: '#4b5563', fontSize: 14 }}>Not enough history yet.</div>}
+          <Panel title="Patterns" icon="activity" note="last 30 days">
+            {!trends && <div className="empty">Not enough history yet.</div>}
             {trends && (
               <>
-                <Stat
-                  label="Repeated questions today"
-                  value={trends.repeats_today}
-                  compare={`avg ${trends.repeats_avg} a day`}
-                  alarm={trends.repeats_today > trends.repeats_avg * 1.5}
-                />
-                <Stat
-                  label="Medicine confirmed"
-                  value={`${trends.adherence_pct}%`}
-                  compare={`${trends.adherence_days} days tracked`}
-                />
+                <div className="row-list">
+                  <Stat
+                    label="Repeated questions today"
+                    value={trends.repeats_today}
+                    compare={`avg ${trends.repeats_avg} a day`}
+                    alarm={trends.repeats_today > trends.repeats_avg * 1.5}
+                  />
+                  <Stat
+                    label="Medicine confirmed"
+                    value={`${trends.adherence_pct}%`}
+                    compare={`${trends.adherence_days} days tracked`}
+                  />
+                </div>
                 <div style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 8 }}>UNSETTLED BY HOUR, HER TIME</div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 56 }}>
+                  <div className="eyebrow" style={{ marginBottom: 10 }}>Unsettled by hour, her time</div>
+                  <div className="bars">
                     {(trends.distress_by_hour || []).map((v, h) => (
-                      <div key={h} title={`${h}:00`} style={{
-                        flex: 1, height: `${Math.max(3, v * 100)}%`,
-                        background: v > 0.6 ? '#f87171' : '#1e3a5f', borderRadius: 2,
-                      }} />
+                      <div key={h} title={`${h}:00`} className={`bar${v > 0.6 ? ' hot' : ''}`}
+                        style={{ height: `${Math.max(4, v * 100)}%` }} />
                     ))}
                   </div>
+                  <div className="bars-axis"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span></div>
                 </div>
               </>
             )}
@@ -324,17 +289,14 @@ export default function Dashboard() {
         {/* Ask anything */}
         <Panel
           title="Ask about her"
-          note={<a href={LIBRECHAT_URL} target="_blank" rel="noreferrer"
-            style={{ color: '#7c3aed', textDecoration: 'none', fontWeight: 600 }}>
-            open full screen ↗
+          icon="sparkles"
+          tone="accent"
+          note={<a href={LIBRECHAT_URL} target="_blank" rel="noreferrer" className="link">
+            Open full screen <Icon name="arrowUpRight" size={13} />
           </a>}
-          style={{ height: 'calc(100vh - 130px)' }}
+          style={{ height: 'calc(100vh - 150px)' }}
         >
-          <iframe
-            src={LIBRECHAT_URL}
-            title="Ask about her"
-            style={{ width: '100%', height: '100%', border: 'none', borderRadius: 8, background: '#0a0a14' }}
-          />
+          <iframe src={LIBRECHAT_URL} title="Ask about her" className="frame" />
         </Panel>
       </div>
     </div>
@@ -342,14 +304,11 @@ export default function Dashboard() {
 }
 
 const Stat = ({ label, value, compare, alarm }) => (
-  <div style={{
-    display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-    padding: '10px 0', borderBottom: '1px solid #1e3a5f',
-  }}>
+  <div className="stat">
     <div>
       <div style={{ fontSize: 14 }}>{label}</div>
-      <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{compare}</div>
+      <div className="sub">{compare}</div>
     </div>
-    <div style={{ fontSize: 26, fontWeight: 700, color: alarm ? '#f87171' : '#fff' }}>{value}</div>
+    <div className={`stat-value${alarm ? ' alarm' : ''}`}>{value}</div>
   </div>
 )

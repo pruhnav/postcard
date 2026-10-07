@@ -2,11 +2,12 @@ import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router
 import Setup from './pages/Setup'
 import Parent from './pages/Parent'
 import Dashboard from './pages/Dashboard'
+import Icon, { Logo } from './icons'
 
 const links = [
-  ['/setup', 'Context'],
-  ['/console', 'Console'],
-  ['/her', 'Her screen'],
+  ['/setup', 'Context', 'sliders'],
+  ['/console', 'Console', 'layout'],
+  ['/her', 'Her screen', 'monitor'],
 ]
 
 function Nav() {
@@ -15,18 +16,11 @@ function Nav() {
   if (pathname === '/her') return null
 
   return (
-    <nav style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99,
-      background: 'rgba(10,10,20,0.95)', backdropFilter: 'blur(12px)', borderTop: '1px solid #1e3a5f',
-      display: 'flex', justifyContent: 'center', gap: 28, padding: '12px 0',
-    }}>
-      {links.map(([to, label]) => (
-        <NavLink key={to} to={to} style={({ isActive }) => ({
-          color: isActive ? '#fff' : '#6b7280',
-          textDecoration: 'none', fontSize: 13,
-          fontWeight: isActive ? 600 : 400,
-          fontFamily: 'system-ui, sans-serif',
-        })}>
+    <nav className="nav">
+      <div className="nav-brand"><Logo size={22} />Postcard</div>
+      {links.map(([to, label, icon]) => (
+        <NavLink key={to} to={to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+          <Icon name={icon} size={15} />
           {label}
         </NavLink>
       ))}

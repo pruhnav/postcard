@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import './styles.css'
 
 // When the API is behind an ngrok free tunnel, plain browser requests get
 // ngrok's HTML interstitial instead of our JSON. This header skips it.
