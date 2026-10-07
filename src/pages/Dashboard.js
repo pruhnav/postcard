@@ -258,29 +258,22 @@ export default function Dashboard() {
             {!trends && <div className="empty">Not enough history yet.</div>}
             {trends && (
               <>
-                <div className="row-list">
+                <div className="kpis">
                   <Stat
+                    icon="message"
                     label="Repeated questions today"
                     value={trends.repeats_today}
                     compare={`avg ${trends.repeats_avg} a day`}
                     alarm={trends.repeats_today > trends.repeats_avg * 1.5}
                   />
                   <Stat
+                    icon="pill"
                     label="Medicine confirmed"
                     value={`${trends.adherence_pct}%`}
                     compare={`${trends.adherence_days} days tracked`}
                   />
                 </div>
-                <div style={{ marginTop: 14 }}>
-                  <div className="eyebrow" style={{ marginBottom: 10 }}>Unsettled by hour, her time</div>
-                  <div className="bars">
-                    {(trends.distress_by_hour || []).map((v, h) => (
-                      <div key={h} title={`${h}:00`} className={`bar${v > 0.6 ? ' hot' : ''}`}
-                        style={{ height: `${Math.max(4, v * 100)}%` }} />
-                    ))}
-                  </div>
-                  <div className="bars-axis"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span></div>
-                </div>
+                <Unsettled hours={trends.distress_by_hour || []} />
               </>
             )}
           </Panel>
@@ -294,7 +287,7 @@ export default function Dashboard() {
           note={<a href={LIBRECHAT_URL} target="_blank" rel="noreferrer" className="link">
             Open full screen <Icon name="arrowUpRight" size={13} />
           </a>}
-          style={{ height: 'calc(100vh - 150px)' }}
+          style={{ position: 'sticky', top: 16, height: 'calc(100vh - 140px)' }}
         >
           <iframe src={LIBRECHAT_URL} title="Ask about her" className="frame" />
         </Panel>
@@ -303,12 +296,39 @@ export default function Dashboard() {
   )
 }
 
-const Stat = ({ label, value, compare, alarm }) => (
-  <div className="stat">
-    <div>
-      <div style={{ fontSize: 14 }}>{label}</div>
-      <div className="sub">{compare}</div>
-    </div>
-    <div className={`stat-value${alarm ? ' alarm' : ''}`}>{value}</div>
+const Stat = ({ icon, label, value, compare, alarm }) => (
+  <div className={`kpi${alarm ? ' alarm' : ''}`}>
+    <span className={`tile sm ${alarm ? 'danger' : ''}`}><Icon name={icon} size={15} /></span>
+    <div className="kpi-value">{value}</div>
+    <div className="kpi-label">{label}</div>
+    <div className="sub">{compare}</div>
   </div>
 )
+
+const hourLabel = h => `${h % 12 || 12}${h < 12 ? 'am' : 'pm'}`
+
+function Unsettled({ hours }) {
+  const hot = hours.map((v, h) => (v > 0.6 ? h : -1)).filter(h => h >= 0)
+  const peak = hot.length
+    ? (hot.length === 1 ? hourLabel(hot[0]) : `${hourLabel(hot[0])} to ${hourLabel(hot[hot.length - 1] + 1)}`)
+    : null
+
+  return (
+    <div className="chart">
+      <div className="chart-head">
+        <div className="eyebrow">Unsettled by hour, her time</div>
+        {peak
+          ? <span className="pill accent">Peak {peak}</span>
+          : <span className="pill ok">Settled all day</span>}
+      </div>
+      <div className="bars">
+        {hours.map((v, h) => (
+          <div key={h} title={`${hourLabel(h)}: ${Math.round(v * 100)}%`}
+            className={`bar${v > 0.6 ? ' hot' : ''}${v < 0.05 ? ' zero' : ''}`}
+            style={{ height: `${Math.max(3, v * 100)}%` }} />
+        ))}
+      </div>
+      <div className="bars-axis"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span></div>
+    </div>
+  )
+}
