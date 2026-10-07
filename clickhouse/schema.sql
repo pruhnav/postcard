@@ -1,6 +1,6 @@
 -- ClickHouse. The conversation side of Postcard: every sentence the
 -- grandmother says, everything the pipeline derives from it, and the
--- aggregates the console reads. Append-only. Nothing here is ever updated —
+-- aggregates the console reads. Append-only. Nothing here is ever updated;
 -- if a fact needs editing it belongs in Postgres (see schema.sql).
 --
 -- For judges: after a conversation you can watch these fill in real time.

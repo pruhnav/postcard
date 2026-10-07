@@ -6,7 +6,7 @@
 #
 # ClickHouse → localhost:8123   (HTTP; also the /play query UI for judges)
 # LibreChat  → localhost:3080
-# Postgres   → localhost:5433   (only if you don't have a hosted one — see below)
+# Postgres   → localhost:5433   (only if you don't have a hosted one; see below)
 #
 # LibreChat reaches the Postcard MCP server at host.docker.internal:3001/mcp,
 # so run `npm run server` on the host before using the chat panel.
@@ -16,7 +16,7 @@ services:
     image: clickhouse/clickhouse-server:24.8-alpine
     restart: unless-stopped
     ports:
-      - "8123:8123"   # HTTP — our client, and http://localhost:8123/play for judges
+      - "8123:8123"   # HTTP: our client, and http://localhost:8123/play for judges
       - "9000:9000"   # native protocol
     environment:
       CLICKHOUSE_USER: default

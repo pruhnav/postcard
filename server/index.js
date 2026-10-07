@@ -47,7 +47,7 @@ const fail = (res) => (e) => {
 async function ensureFamily() {
   if (await db.firstFamily()) return
   if (!process.env.FAMILY_ELDER_NAME || !process.env.FAMILY_SPEAKER_NAME) {
-    console.warn('no family row and FAMILY_ELDER_NAME / FAMILY_SPEAKER_NAME not set — open /setup or fill .env')
+    console.warn('no family row and FAMILY_ELDER_NAME / FAMILY_SPEAKER_NAME not set; open /setup or fill .env')
     return
   }
   const id = await db.createFamily({
@@ -222,7 +222,7 @@ app.post('/api/llm/chat/completions', async (req, res) => {
       } catch (e) {
         console.error('stream upstream:', e.message)
       }
-      if (!full.trim()) { full = 'Amama, say that again for me — I want to hear you properly.'; chunk({ content: full }) }
+      if (!full.trim()) { full = 'Amama, say that again for me. I want to hear you properly.'; chunk({ content: full }) }
       chunk({}, 'stop')
       res.write('data: [DONE]\n\n')
       res.end()
@@ -253,7 +253,7 @@ app.post('/api/llm/chat/completions', async (req, res) => {
 
 // Tavus posts conversation events here. The per-turn transcript is already
 // captured through /api/llm/chat/completions, so all we do here is write the
-// end-of-call summary — once, even though Tavus fires shutdown more than once.
+// end-of-call summary: once, even though Tavus fires shutdown more than once.
 let lastShutdownAt = 0
 app.post('/api/tavus/webhook', async (req, res) => {
   res.json({ ok: true })
@@ -278,7 +278,7 @@ async function ingest(family_id, spoken, reply, embedding) {
   if (!spoken || !spoken.trim() || NOISE.test(spoken)) return
 
   // Tavus retries and speculatively re-sends turns. If the same line comes
-  // back within a few seconds, it's not a new turn — don't double-record it.
+  // back within a few seconds, it's not a new turn, so don't double-record it.
   const norm = spoken.trim().toLowerCase()
   if (s.lastLine === norm && Date.now() - (s.lastLineAt || 0) < 20000) return
   s.lastLine = norm
@@ -332,7 +332,7 @@ async function write(family_id, speaker, text, embedding, extra) {
   }])
 }
 
-// ─── The daily summary — generated and kept ──────────────────────────
+// ─── The daily summary: generated and kept ──────────────────────────
 
 let lastSummaryAt = 0
 let lastSummaryText = ''

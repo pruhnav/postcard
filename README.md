@@ -1,6 +1,8 @@
-# Postcard
+<p align="center">
+  <img src="docs/assets/postcard-banner.svg" alt="Postcard, Better Days Hackathon '26" width="100%">
+</p>
 
-*The small thing you send home when you can't be there.*
+**The small thing you send home when you can't be there.**
 
 A granddaughter moved from Chennai to the US. Her grandmother is seventy, alone
 most days, and eleven and a half hours behind. They talk about once a week.
@@ -11,6 +13,25 @@ the world that tells the granddaughter what she missed.
 
 It remembers everything her grandmother says. It knows only what the
 granddaughter has told it about herself.
+
+**Built for ClickHouse's Better Days Hackathon 2026.**
+
+![Postcard console: her room, what she's saying, people we don't know, patterns, and the Ask about her chat](docs/assets/screenshots/console.png)
+
+[Where each service is used](docs/where-each-service-is-used.md) · [The persona](docs/persona.md) · [Running it locally](docs/RUNNING.md) · [Hosted demo](docs/DEPLOY.md)
+
+## What it does
+
+| Where | What happens | Why it matters |
+| --- | --- | --- |
+| **Her screen** | A full-screen Tavus avatar of Ruby she can talk to any time, with the clock, her own camera, and medicine reminders she taps **Done** on | Company on the six days there is no call |
+| **Console** | Ruby sees her room, what she said today, medicine answers, and the day written up, on both clocks | The week she missed, in one place |
+| **People we don't know** | Names the avatar heard but nobody explained, with mention counts and quotes. Type who they are and the avatar knows next time | The avatar asks instead of guessing |
+| **Patterns** | Repeated questions against her own average, medicine adherence, and when in the day she sounds unsettled | Slow changes show up before anyone has to say them |
+| **Ask about her** | A LibreChat agent with MCP tools over ClickHouse and Postgres | Ask "how did she sleep this week?" and get an answer from her own words |
+| **Context** | The curated facts the avatar is allowed to say: people, memories, medicines, news | "Never invent anything" is enforced by the data, not the prompt |
+
+![Context page: people, memories, medicines and news the avatar may speak from](docs/assets/screenshots/setup.png)
 
 ---
 
@@ -24,7 +45,7 @@ them useless for the one job a companion has.
 Postcard fixes both by splitting memory in two. What the avatar knows about the
 granddaughter lives in **Postgres**: a handful of relationships, five memories,
 whatever news she has written down this week. Small, curated, and the only place
-a new fact about Ruby can come from — which is what makes "never invent anything"
+a new fact about Ruby can come from, which is what makes "never invent anything"
 enforceable rather than aspirational. What the avatar knows about the grandmother
 lives in **ClickHouse**: every sentence she has ever said, retrievable by
 meaning, plus everything the pipeline derives from those sentences.
@@ -42,31 +63,40 @@ without anyone doing data entry.
 
 Full map in [`docs/where-each-service-is-used.md`](docs/where-each-service-is-used.md).
 
-- **Tavus** — the avatar she talks to. Configured to call our
-  `/api/llm/chat/completions` as its model, so retrieval happens *inside* the
-  conversation.
-- **ClickHouse** — the conversation side. `utterances` (every turn + embedding),
-  `conversation_summaries`, `extractions` (the audit log of every fact pulled
-  from a chat), and three materialized views. Append-only, grows forever.
-- **Postgres** — the curated store the avatar speaks from. People, memories,
-  medicines, reminders, news. Rows are either `source='ruby'` (typed on
-  `/setup`) or `source='conversation'` (auto-extracted, `unverified=true`).
-- **LibreChat** — the "Ask about her" chat in the console's right column. Talks
-  to a nine-tool MCP server that queries ClickHouse and Postgres directly.
+| Service | Role | What lives there |
+| --- | --- | --- |
+| **Tavus** | The avatar she talks to | Configured to call our `/api/llm/chat/completions` as its model, so retrieval happens *inside* the conversation |
+| **ClickHouse** | The conversation side | `utterances` (every turn + embedding), `conversation_summaries`, `extractions` (the audit log of every fact pulled from a chat), and three materialized views. Append-only, grows forever |
+| **Postgres** | The curated store the avatar speaks from | People, memories, medicines, reminders, news. Rows are either `source='ruby'` (typed on `/setup`) or `source='conversation'` (auto-extracted, `unverified=true`) |
+| **LibreChat** | The "Ask about her" chat in the console's right column | Talks to an MCP server that queries ClickHouse and Postgres directly |
 
+### Every turn
+
+```mermaid
+flowchart LR
+  A["Her browser<br/><i>Tavus avatar</i>"] --> B["POST /api/llm/chat/completions"]
+  B --> C["Embed locally"]
+  C --> D["ClickHouse<br/>recall by meaning"]
+  B --> E["Postgres<br/>who, what, memories"]
+  D --> F["Reply"]
+  E --> F
+  F --> A
 ```
-her browser ── Tavus ── POST /api/llm/chat/completions
-                                 │
-                   embed (local) ┤
-                                 ├── ClickHouse: recall by meaning
-                   Postgres ─────┤   (curated: who, what, memories)
-                                 └── reply
-                          then, off the response path:
-                          score · embed · detect repeat        → ClickHouse utterances
-                          extract medicines/reminders/memories → ClickHouse extractions
-                                                               → Postgres  (unverified)
-                          on call end: summarise               → ClickHouse conversation_summaries
+
+### Off the response path
+
+```mermaid
+flowchart LR
+  T["Her turn"] --> S["Score, embed,<br/>detect repeat"]
+  S --> U[("ClickHouse<br/>utterances")]
+  T --> X["Extract medicines,<br/>reminders, memories"]
+  X --> XL[("ClickHouse<br/>extractions")]
+  X --> PG[("Postgres<br/>unverified")]
+  END["Call ends"] --> SUM["Summarise"]
+  SUM --> CS[("ClickHouse<br/>conversation_summaries")]
 ```
+
+![Her screen in mock mode (no Tavus session, so the avatar area is dark): the clock, her self view, and a medicine reminder](docs/assets/screenshots/her-screen.png)
 
 ---
 
@@ -87,9 +117,9 @@ npm start                          # :3000
 
 Then:
 
-- `/setup` — the curated context. People, memories, medicines, news.
-- `/console` — Ruby's side.
-- `/her` — the avatar, on her device.
+- `/setup`: the curated context. People, memories, medicines, news.
+- `/console`: Ruby's side.
+- `/her`: the avatar, on her device.
 
 Embeddings run in-process, no API key. ClickHouse runs in the compose (or point
 `CLICKHOUSE_URL` at ClickHouse Cloud). Postgres is any hosted instance, or
@@ -147,7 +177,7 @@ restart the server, and the avatar's behaviour changes. No code in it.
   and flag it for a human.
 - No medical advice beyond asking whether she took what she was prescribed.
 - No promises about visits or calls.
-- She knows Ruby set the avatar up. The deflection line is true — the avatar
+- She knows Ruby set the avatar up. The deflection line is true: the avatar
   really does ask Ruby, and the answer comes back the next day.
 
 ---
@@ -166,7 +196,7 @@ restart the server, and the avatar's behaviour changes. No code in it.
    confirmed when she answers.
 6. The patterns panel: repeated questions today against her own average.
 
-Steps 3 and 4 are the ones to spend time on — the parts that can't be built with
+Steps 3 and 4 are the ones to spend time on: the parts that can't be built with
 a prompt.
 
 ---

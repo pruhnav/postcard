@@ -4,7 +4,7 @@ const llm = require('./llm')
 const { today, stamp } = require('./localtime')
 
 // After the grandmother speaks, this pulls structured facts out of what she
-// actually said — never inferred, never invented — and does two things with
+// actually said (never inferred, never invented) and does two things with
 // each one:
 //
 //   1. writes an audit row to ClickHouse `extractions` (judges watch this)
@@ -19,7 +19,7 @@ const SCHEMA = {
   medicine_taken: null, distress: 0, about_late_husband: false, topics: [],
 }
 
-// Endearments, address terms, and bare relationship words — never a "person".
+// Endearments, address terms, and bare relationship words: never a "person".
 const NOT_NAMES = new Set([
   // endearments / address
   'kanna', 'kanne', 'ma', 'maa', 'da', 'di', 'chellam', 'raja', 'rani', 'ponnu',
@@ -36,7 +36,7 @@ const NOT_NAMES = new Set([
 // earlier lines are there so "call him on Tuesday" can resolve "him".
 const CONTEXT_TURNS = 3
 
-// Words that mean a symptom, not a medicine name — guards against the model
+// Words that mean a symptom, not a medicine name. Guards against the model
 // filing "my knee has been aching" as a medicine.
 const SYMPTOM_WORDS = /\b(ache|aching|ached|pain|painful|hurt|hurts|sore|swollen|stiff|dizzy|tired|weak|cough|cold|fever|nausea|knee|back|hip|chest|stomach|head)\b/i
 
@@ -55,7 +55,7 @@ const looksLikeMedicine = (name) => {
 const PROMPT = (windowText, latest, knownPeople, knownMeds, todayStr) =>
 `An elderly woman (ELDER) is talking with her granddaughter's avatar (AVATAR).
 Extract structured facts from ELDER's FINAL line only. The earlier lines are
-context for resolving pronouns — do not extract from them, and never extract
+context for resolving pronouns; do not extract from them, and never extract
 anything the AVATAR said. Extract only what she stated plainly. When unsure,
 leave it out.
 
@@ -118,7 +118,7 @@ const seenSet = (sid) => {
   return seenBySession.get(sid)
 }
 const norm = (s) => (s || '').toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 120)
-// Aggressive: letters and digits only, first 50 — catches typos and punctuation drift.
+// Aggressive: letters and digits only, first 50. Catches typos and punctuation drift.
 const sig = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 50)
 
 async function audit(family_id, session_id, kind, payload, sourceText, applied, postgres_id, note) {
@@ -156,7 +156,7 @@ async function apply(family_id, session_id, a) {
       await audit(family_id, session_id, 'medicine', m, m.said, false, '', 'rejected: not a medicine name')
       continue
     }
-    // "I took my Metformin" is not a new medicine — that's medicine_taken's job.
+    // "I took my Metformin" is not a new medicine; that's medicine_taken's job.
     if ((m.change === 'new' || !m.change) && knownMedLower.has(m.name.toLowerCase())) {
       await audit(family_id, session_id, 'medicine', m, m.said, false, '', 'already known, no change stated')
       continue
