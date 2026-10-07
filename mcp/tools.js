@@ -1,6 +1,6 @@
 // Shared tool definitions for the Postcard MCP server. Used two ways:
-//   mcp/server.js         — stdio, for `npm run mcp` and classic LibreChat config
-//   server/index.js /mcp  — streamable HTTP, so LibreChat in Docker can reach it
+//   mcp/server.js: stdio, for `npm run mcp` and classic LibreChat config
+//   server/index.js /mcp: streamable HTTP, so LibreChat in Docker can reach it
 
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js')
 const {
@@ -39,7 +39,7 @@ const TOOLS = [
   },
   {
     name: 'extraction_log',
-    description: "What the pipeline pulled out of recent conversations — medicines, reminders, memories, notes, names — and whether each was written to the curated store. Source: ClickHouse extractions.",
+    description: "What the pipeline pulled out of recent conversations (medicines, reminders, memories, notes, names) and whether each was written to the curated store. Source: ClickHouse extractions.",
     inputSchema: { type: 'object', properties: { limit: { type: 'number' } } },
   },
   {

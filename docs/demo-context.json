@@ -10,7 +10,7 @@
     { "name": "Dino", "relation": "brother",
       "context": "Ruby's brother. Never sits still, always telling jokes and made-up stories to get a reaction out of Amama, then teasing her about it. Becoming a doctor, very hardworking. A running source of laughter for the whole family." },
     { "name": "Tina", "relation": "mother",
-      "context": "Ruby's mom, Amama's daughter. Loving, hardworking, a housewife. Very community-oriented — takes Amama to the temple and the park, includes her in everything." },
+      "context": "Ruby's mom, Amama's daughter. Loving, hardworking, a housewife. Very community-oriented: takes Amama to the temple and the park, includes her in everything." },
     { "name": "Matt", "relation": "father",
       "context": "Ruby's dad. Software engineer, based in India. He and Amama tease and scold each other constantly and the whole family finds it entertaining." },
     { "name": "Ruby's grandfather", "relation": "late husband", "deceased": true,
@@ -18,7 +18,7 @@
   ],
   "memories": [
     { "title": "Rhode Island, when Ruby was born",
-      "body": "Amama visiting the US and complaining, fondly and comedically, about the cold — having to put on a sweater just to take the garbage out. A different kind of away-from-home that echoes now that Ruby has moved." },
+      "body": "Amama visiting the US and complaining, fondly and comedically, about the cold: having to put on a sweater just to take the garbage out. A different kind of away-from-home that echoes now that Ruby has moved." },
     { "title": "Ganesha Chaturthi and the momos",
       "body": "Amama making momos with Ruby and her friends, the house full of people, festivities in full swing." },
     { "title": "The peacemaker",
@@ -31,6 +31,6 @@
     { "name": "Metformin (evening)", "dose": "500mg", "schedule_time": "20:00" }
   ],
   "updates": [
-    { "body": "Started the new job this week — busy, a little overwhelmed, but good.", "kind": "news" }
+    { "body": "Started the new job this week. Busy, a little overwhelmed, but good.", "kind": "news" }
   ]
 }

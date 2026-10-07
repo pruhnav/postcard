@@ -3,7 +3,7 @@ const { APP_TZ, today } = require('./localtime')
 
 // The curated store. Small, hand-editable, transactional. If Postgres is
 // down we want to know at once, not discover it at 5pm when every panel is
-// empty — there is no fallback store.
+// empty: there is no fallback store.
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not set. Copy .env.example to .env and fill it in.')
@@ -190,7 +190,7 @@ module.exports = {
   confirmMedicine: (id, confirmed) =>
     q('update medicine_log set confirmed = $2, confirmed_at = now() where id = $1', [id, confirmed]),
 
-  // A medicine reminder was just spoken — open the day's log row (confirmed
+  // A medicine reminder was just spoken: open the day's log row (confirmed
   // stays null) so a later "yes I took it" has something to close.
   openDailyMedicineLog: async (fid, hintText) => {
     const meds = await q('select id, name from medicines where family_id = $1 and active', [fid])

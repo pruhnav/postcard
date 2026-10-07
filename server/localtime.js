@@ -2,7 +2,7 @@
 // per-row timezones. Every timestamp we write is her naive wall-clock in
 // APP_TZ (produced by stamp() / today() here). ClickHouse stores and reads
 // those digits against a single fixed reference, so toHour(ts) is her hour
-// and toDate(ts) is her date — no session timezone needed. The one place a
+// and toDate(ts) is her date; no session timezone needed. The one place a
 // live "now" is compared to her clock (pending reminders) passes APP_TZ
 // explicitly.
 //
@@ -19,7 +19,7 @@ const parts = (d) => {
   return f
 }
 
-// 'YYYY-MM-DD HH:MM:SS.mmm' in APP_TZ — the format ClickHouse DateTime64 wants.
+// 'YYYY-MM-DD HH:MM:SS.mmm' in APP_TZ: the format ClickHouse DateTime64 wants.
 const stamp = (d = new Date()) => {
   const p = parts(d)
   return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}.${String(d.getMilliseconds()).padStart(3, '0')}`

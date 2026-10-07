@@ -3,7 +3,7 @@ require('dotenv').config({ path: '.env' })
 
 // Loads the curated store (Postgres) from docs/demo-context.json: the family,
 // the people, the memories, the medicines, one line of news. Everything here
-// is source='ruby', verified — it is what Ruby would have typed on /setup.
+// is source='ruby', verified: it is what Ruby would have typed on /setup.
 //
 //   npm run seed:context
 //   npm run seed:context -- path/to/other.json
@@ -24,7 +24,7 @@ async function main() {
     console.log(`created family ${family.id} (${family.elder_name} / ${family.speaker_name})`)
   } else {
     await db.patchFamily(family.id, ctx.family)
-    console.log(`family ${family.id} already existed — details updated`)
+    console.log(`family ${family.id} already existed, details updated`)
   }
   const fid = family.id
 

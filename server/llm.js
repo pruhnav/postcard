@@ -4,7 +4,7 @@ const GATEWAY = (process.env.LLM_GATEWAY_URL || '').replace(/\/$/, '')
 const KEY = (process.env.LLM_GATEWAY_KEY || '').trim()
 const MODEL = process.env.LLM_MODEL || 'anthropic/claude-haiku'
 
-// Embeddings run locally — no API key, no external dependency. First call
+// Embeddings run locally: no API key, no external dependency. First call
 // downloads ~90MB of model weights, then it is ~30ms per line on a laptop.
 // all-MiniLM-L6-v2 is 384-dimensional; cosineDistance does not care about the
 // number as long as seed and live use the same model, which they do.
@@ -24,7 +24,7 @@ async function chat(messages, { system, temperature = 0.7, max_tokens = 400 } = 
   return data.choices?.[0]?.message?.content || ''
 }
 
-// Streaming variant — yields text deltas as they arrive. Tavus's custom-LLM
+// Streaming variant: yields text deltas as they arrive. Tavus's custom-LLM
 // client sends {stream: true} and waits for OpenAI-style SSE chunks; without
 // this the avatar gets a reply it cannot parse and stays silent.
 async function* chatStream(messages, { system, temperature = 0.7, max_tokens = 400 } = {}) {

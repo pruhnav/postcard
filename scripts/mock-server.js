@@ -124,7 +124,7 @@ app.get('/api/unknown-people', (_q, res) => res.json(unknowns))
 
 app.post('/api/relations', (req, res) => {
   unknowns = unknowns.filter(u => u.name !== req.body.name)
-  console.log(`taught: ${req.body.name} — ${req.body.context}`)
+  console.log(`taught: ${req.body.name}, ${req.body.context}`)
   res.json({ ok: true })
 })
 
@@ -140,4 +140,4 @@ app.post('/api/medicines', (_q, res) => res.json({ ok: true }))
 app.post('/api/updates', (_q, res) => res.json({ ok: true }))
 app.post('/api/reminders', (_q, res) => res.json({ ok: true }))
 
-app.listen(3001, () => console.log('mock api on :3001 — nothing here is real'))
+app.listen(3001, () => console.log('mock api on :3001, nothing here is real'))

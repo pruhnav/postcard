@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <mask id="p"><rect width="24" height="24" fill="#fff"/><g fill="#000"><circle cx="4.5" cy="1" r="1.1"/><circle cx="8.25" cy="1" r="1.1"/><circle cx="12" cy="1" r="1.1"/><circle cx="15.75" cy="1" r="1.1"/><circle cx="19.5" cy="1" r="1.1"/><circle cx="4.5" cy="23" r="1.1"/><circle cx="8.25" cy="23" r="1.1"/><circle cx="12" cy="23" r="1.1"/><circle cx="15.75" cy="23" r="1.1"/><circle cx="19.5" cy="23" r="1.1"/><circle cx="1" cy="4.5" r="1.1"/><circle cx="1" cy="8.25" r="1.1"/><circle cx="1" cy="12" r="1.1"/><circle cx="1" cy="15.75" r="1.1"/><circle cx="1" cy="19.5" r="1.1"/><circle cx="23" cy="4.5" r="1.1"/><circle cx="23" cy="8.25" r="1.1"/><circle cx="23" cy="12" r="1.1"/><circle cx="23" cy="15.75" r="1.1"/><circle cx="23" cy="19.5" r="1.1"/></g></mask>
+  <rect width="24" height="24" rx="2" fill="#f2b544" mask="url(#p)"/>
+  <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="1.2" fill="none" stroke="#2a1c00" stroke-opacity=".28" stroke-width=".7"/>
+  <text x="12" y="16.6" text-anchor="middle" font-family="Lora, Georgia, serif" font-weight="700" font-size="12.5" fill="#2a1c00">P</text>
+</svg>

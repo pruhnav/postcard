@@ -1,4 +1,4 @@
-# Hosted demo — Netlify frontend + tunnelled backend
+# Hosted demo: Netlify frontend + tunnelled backend
 
 The backend (API, ClickHouse, Postgres, LibreChat, Mongo) keeps running on your
 machine. Only the React frontend is hosted, on Netlify. Two tunnels bridge them:
@@ -6,7 +6,7 @@ machine. Only the React frontend is hosted, on Netlify. Two tunnels bridge them:
 | tunnel | exposes | used for |
 |---|---|---|
 | **ngrok** (static domain) | API server `:3001` | every avatar turn, the console panels, Tavus's LLM callback |
-| **cloudflared** | LibreChat `:3081` | the "Ask about her" chat — opens in a new tab from the console |
+| **cloudflared** | LibreChat `:3081` | the "Ask about her" chat, opens in a new tab from the console |
 
 ```
 Netlify (frontend)
@@ -47,7 +47,7 @@ docker compose up -d librechat
 
 **Netlify → Add new site → Import from Git →** pick the repo. `netlify.toml`
 already sets the build command, publish dir and SPA redirect. Set the two env
-vars — in `netlify.toml` (commit + push) or **Site settings → Environment
+vars in `netlify.toml` (commit + push) or **Site settings → Environment
 variables** (then Deploys → Trigger deploy):
 
 ```
@@ -70,7 +70,7 @@ sed -i '' "s#^TAVUS_CALLBACK_URL=.*#TAVUS_CALLBACK_URL=$API_URL/api/tavus/webhoo
 
 ## When a tunnel restarts (URL changes)
 
-- **ngrok** keeps `helper-prepaid-overhaul.ngrok-free.dev` (it's reserved) — nothing to do.
+- **ngrok** keeps `helper-prepaid-overhaul.ngrok-free.dev` (it's reserved), so there is nothing to do.
 - **cloudflared** gets a new `*.trycloudflare.com` each time. Then:
   1. `DOMAIN_CLIENT`/`DOMAIN_SERVER` in `docker-compose.yml` → `docker compose up -d librechat`
   2. `REACT_APP_LIBRECHAT_URL` on Netlify → trigger a redeploy
@@ -84,5 +84,5 @@ A [Cloudflare named tunnel](https://developers.cloudflare.com/cloudflare-one/con
   interstitial doesn't break `fetch` (`src/index.js`).
 - The console's chat panel embeds LibreChat in an iframe **and** offers
   "open full screen ↗". On the hosted site the iframe won't stay logged in
-  (LibreChat's `SameSite=Strict` cookie, cross-site) — use the link.
-- `getUserMedia` on `/her` needs HTTPS — Netlify provides it.
+  (LibreChat's `SameSite=Strict` cookie, cross-site). Use the link.
+- `getUserMedia` on `/her` needs HTTPS, which Netlify provides.

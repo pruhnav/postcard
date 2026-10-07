@@ -23,17 +23,17 @@ Four moving parts. Each does one job and the seams are visible.
    └───────────────┘                   └───────────────┘
 ```
 
-## Tavus — the avatar she talks to
+## Tavus: the avatar she talks to
 
 - `server/tavus.js` creates one conversation per session and can make the avatar
   **speak** a reminder mid-call.
 - Configured to call **our** endpoint (`POST /api/llm/chat/completions`) as its
-  model, so every turn runs through `server/index.js` — retrieval and the
+  model, so every turn runs through `server/index.js`: retrieval and the
   persona happen *inside* the conversation, not in a Tavus dashboard.
 - `POST /api/tavus/webhook` receives transcript events and the end-of-call
   event (which triggers a summary).
 
-## ClickHouse — everything the conversation produces
+## ClickHouse: everything the conversation produces
 
 One append-only stream plus what we derive from it. Nothing here is ever
 updated. Judges can watch these fill in the ClickHouse console during a demo:
@@ -47,7 +47,7 @@ updated. Judges can watch these fill in the ClickHouse console during a demo:
 | `distress_by_hour` (MV) | materialized from `utterances` | when in her day she sounds unsettled |
 | `mentions` (MV) | materialized from `utterances` | running count of every name she's used |
 
-Reads: `server/ch.js` — `recall()` (vector search on every turn),
+Reads: `server/ch.js` has `recall()` (vector search on every turn),
 `isRepeat()`, `trends()`, `unknownNames()`, `recentExtractions()`,
 `recentSummaries()`.
 
@@ -57,7 +57,7 @@ SELECT ts, kind, source_text, applied, postgres_id, note
 FROM extractions ORDER BY ts DESC;
 ```
 
-## Postgres — the curated store the avatar speaks from
+## Postgres: the curated store the avatar speaks from
 
 Small, transactional, and the **only** place a new fact about Ruby's world can
 come from. `schema.sql`, all access through `server/db.js`.
@@ -81,7 +81,7 @@ UNION ALL SELECT 'reminder', text, source, unverified FROM reminders
 ORDER BY unverified DESC;
 ```
 
-## LibreChat — the "Ask about her" chat in the console
+## LibreChat: the "Ask about her" chat in the console
 
 - Runs in Docker (`docker-compose.yml`), embedded as the console's right column
   (`src/pages/Dashboard.js`, `REACT_APP_LIBRECHAT_URL`).

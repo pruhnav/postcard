@@ -1,6 +1,6 @@
 -- Postgres. The curated store: small, transactional, and the only place
 -- anywhere that can put a new fact about Ruby into the avatar's mouth.
--- Anything unbounded — every sentence, every embedding, every extraction —
+-- Anything unbounded (every sentence, every embedding, every extraction)
 -- lives in ClickHouse instead. See clickhouse/schema.sql
 --
 -- Two ways a row gets here:

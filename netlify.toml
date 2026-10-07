@@ -1,7 +1,7 @@
 # Netlify builds ONLY the React frontend. The backend runs on your machine and
 # is exposed through tunnels:
 #   REACT_APP_API           -> the API server (:3001), ngrok
-#   REACT_APP_LIBRECHAT_URL -> LibreChat (:3081), cloudflared — opens in a new tab
+#   REACT_APP_LIBRECHAT_URL -> LibreChat (:3081), via cloudflared; opens in a new tab
 #
 # Tunnel URLs change when a tunnel restarts. Update these two values (here or in
 # Site settings -> Environment variables) and redeploy. See docs/DEPLOY.md.
